@@ -89,7 +89,7 @@ Net::IMP::HTTP::Base - base class for HTTP connection specific IMP plugins
 Net::IMP::HTTP::Request is a base class for HTTP request specific IMP plugins.
 It provides a way to use such plugins in HTTP aware applications, like
 L<App::HTTP_Proxy_IMP>, but with the help of
-L<Net::IMP::Adaptor::STREAM2HTTPRequest> also in applications using only an
+L<Net::IMP::Adaptor::STREAM2HTTPReq> also in applications using only an
 untyped data stream.
 
 Return values are the same as in other IMP plugins but are all related to the

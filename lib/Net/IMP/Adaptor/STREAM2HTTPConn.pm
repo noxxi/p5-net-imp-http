@@ -187,3 +187,38 @@ sub fatal {
 }
 
 1;
+__END__
+
+=head1 NAME 
+
+Net::IMP::Adaptor::STREAM2HTTPConn - translate IMP_DATA_STREAM data type to HTTP
+connection data types
+
+=head1 SYNOPSIS
+
+    # use automatically
+    package myHTTP_IMP_Plugin;
+    use base 'Net::IMP';
+    sub INTERFACE { return (
+	[ IMP_DATA_HTTP, \@rtypes ],
+	# automatically insert adaptor if we need to use stream data
+	[ IMP_DATA_STREAM, \@rtypes, 'Net::IMP::Adaptor::STREAM2HTTPConn' ],
+    )}
+
+    # or by hand
+    my $stream_factory = Net::IMP::Adaptor::STREAM2HTTPConn->new_factory;
+    my $http_factory = Net::IMP::HTTP::someAnalyzer->new_factory;
+    # this will create inner analyzer by calling $http_factory->new_analyzer
+    my $analyzer = $stream_factory->new_analyzer(
+	factory => $http_factory
+    );
+
+=head1 DESCRIPTION
+
+This module translates between IMP_DATA_STREAM data type and HTTP connection
+specific data types as defined in L<Net::IMP::HTTP> by interpreting the stream
+as HTTP requests with the help of L<Net::Inspect::L7::HTTP>.
+
+It works like a normal IMP plugin understanding only IMP_DATA_STREAM types.
+C<new_analyzer> gets an argument C<factory> with the factory object for the
+inner analyzer.
