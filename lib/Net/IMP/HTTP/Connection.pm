@@ -3,9 +3,10 @@ use warnings;
 
 package Net::IMP::HTTP::Connection;
 use base 'Net::IMP::Base';
+use fields qw(dispatcher pos);
 use Net::IMP::HTTP;
 use Net::IMP;
-
+use Carp 'croak';
 
 # just define a typical set, maybe need to be redefined in subclass
 sub RTYPES { 
@@ -15,53 +16,90 @@ sub RTYPES {
 
 sub INTERFACE {
     my $factory = shift;
-    my @rt = $factory->RTYPES;
+    my @rtx = my @rt = $factory->RTYPES;
+    push @rtx, IMP_DENY if ! grep { IMP_DENY == $_ } @rtx;
     return (
 	[ IMP_DATA_HTTP, \@rt ],
-	[ IMP_DATA_STREAM, \@rt, 'Net::IMP::Adaptor::STREAM2HTTPConn' ],
+	[ IMP_DATA_HTTPRQ, \@rt ],
+	[ IMP_DATA_STREAM, \@rtx, 'Net::IMP::Adaptor::STREAM2HTTPConn' ],
     );
 }
 
-my %dispatcher = (
-    IMP_DATA_HTTP_HEADER+0     => [ \&request_hdr, \&response_hdr ],
-    IMP_DATA_HTTP_BODY+0       => [ \&request_body, \&response_body ],
-    IMP_DATA_HTTP_CHKHDR+0     => [ undef, \&rsp_chunk_hdr ],
-    IMP_DATA_HTTP_CHKTRAILER+0 => [ undef, \&rsp_chunk_trailer ],
-    IMP_DATA_HTTP_DATA+0       => \&any_data,
-    IMP_DATA_HTTP_JUNK+0       => \&junk_data,
-);
+sub set_interface {
+    my ($factory,$interface) = @_;
+    my $newf = $factory->SUPER::set_interface($interface)
+	or return;
+    return $newf if $newf != $factory;
+
+    # original factory, set dispatcher based on input data type
+    if ( $interface->[0] == IMP_DATA_HTTP ) {
+	$factory->{dispatcher} = {
+	    IMP_DATA_HTTP_HEADER+0  => [ 
+		$factory->can('request_hdr'),
+		$factory->can('response_hdr'),
+	    ],
+	    IMP_DATA_HTTP_BODY+0 => [ 
+		$factory->can('request_body'),
+		$factory->can('response_body'),
+	    ],
+	    IMP_DATA_HTTP_CHKHDR+0 => [ 
+		undef, 
+		$factory->can('rsp_chunk_hdr') 
+	    ],
+	    IMP_DATA_HTTP_CHKTRAILER+0 => [ 
+		undef, 
+		$factory->can('rsp_chunk_trailer') 
+	    ],
+	    IMP_DATA_HTTP_DATA+0 => $factory->can('any_data'),
+	    IMP_DATA_HTTP_JUNK+0 => $factory->can('junk_data')
+	}
+    } elsif ( $interface->[0] == IMP_DATA_HTTPRQ ) {
+	$factory->{dispatcher} = {
+	    # HTTP request interface
+	    IMP_DATA_HTTPRQ_HEADER+0  => [ 
+		$factory->can('request_hdr'),
+		$factory->can('response_hdr'),
+	    ],
+	    IMP_DATA_HTTPRQ_CONTENT+0 => [ 
+		$factory->can('request_body'),
+		$factory->can('response_body'),
+	    ],
+	    IMP_DATA_HTTPRQ_DATA+0 => $factory->can('any_data'),
+	}
+    } else {
+	die "unknown input data type $interface->[0]"
+    }
+
+    return $factory;
+}
+
+sub new_analyzer {
+    my ($factory,%args) = @_;
+    my $analyzer = $factory->SUPER::new_analyzer(%args);
+    $analyzer->{dispatcher} = $factory->{dispatcher};
+    return $analyzer;
+}
+
 
 # we can overide data to handle the types directly, but per default we
 # dispatch to seperate methods
 sub data {
     my ($self,$dir,$data,$offset,$type) = @_;
-    my $disp = $self->{dispatcher} ||= {
-	IMP_DATA_HTTP_HEADER+0  => [ 
-	    $self->can('request_hdr'),
-	    $self->can('response_hdr'),
-	],
-	IMP_DATA_HTTP_BODY+0 => [ 
-	    $self->can('request_body'),
-	    $self->can('response_body'),
-	],
-	IMP_DATA_HTTP_CHKHDR+0 => [ 
-	    undef, 
-	    $self->can('rsp_chunk_hdr') 
-	],
-	IMP_DATA_HTTP_CHKTRAILER+0 => [ 
-	    undef, 
-	    $self->can('rsp_chunk_trailer') 
-	],
-	IMP_DATA_HTTP_DATA+0 => $self->can('any_data'),
-	IMP_DATA_HTTP_JUNK+0 => $self->can('junk_data')
-    };
-    my $sub = $disp->{$type+0} or croak("cannot dispatch type $type");
+    $self->{pos}[$dir] = $offset if $offset;
+    $self->{pos}[$dir] += length($data);
+    my $disp = $self->{dispatcher};
+    my $sub = $disp->{$type+0} or croak("cannot dispatch type $type".Data::Dumper::Dumper($disp));
     if ( ref($sub) eq 'ARRAY' ) {
 	$sub = $sub->[$dir] or croak("cannot dispatch type $type dir $dir");
 	$sub->($self,$data,$offset);
     } else {
 	$sub->($self,$dir,$data,$offset);
     }
+}
+
+sub offset {
+    my ($self,$dir) = @_;
+    return $self->{pos}[$dir] // 0;
 }
 
 ###########################################################################

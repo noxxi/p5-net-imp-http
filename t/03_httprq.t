@@ -52,11 +52,11 @@ push @stream_data,[ 1,IMP_DATA_STREAM,'' ];
 my @typed_rv_expect = (
     # first request
     [ 'pass', 1, -1 ],
-    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n\r\n" ],
     [ 'pass', 0, 29 ],
     # second request
     [ 'pass', 1, -1 ],
-    [ 'replace', 0, 53, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 53, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n\r\n" ],
     [ 'pass', 0, 62 ],
     [ 'pass', 0, 71 ],
     [ 'pass', 0, 73 ],
@@ -139,7 +139,7 @@ sub data {
     $self->{pos0} = ( $offset||$self->{pos0} ) + length($data);
     if ( $type == IMP_DATA_HTTPRQ_HEADER and $dir == 0 ) {
 	# add X-Header: test to request header
-	$data =~s{(\r?\n)\Z}{X-Header: test$1};
+	$data =~s{(\r?\n)\Z}{X-Header: test$1$1};
 	$self->run_callback([
 	    IMP_REPLACE,
 	    0,

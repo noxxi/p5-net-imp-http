@@ -3,7 +3,7 @@ use warnings;
 
 package Net::IMP::HTTP::Request;
 use base 'Net::IMP::Base';
-use fields qw(dispatcher);
+use fields qw(dispatcher pos);
 use Net::IMP::HTTP;
 use Net::IMP;
 use Carp 'croak';
@@ -28,6 +28,10 @@ sub INTERFACE {
 # dispatch to seperate methods
 sub data {
     my ($self,$dir,$data,$offset,$type) = @_;
+
+    $self->{pos}[$dir] = $offset if $offset;
+    $self->{pos}[$dir] += length($data);
+
     my $disp = $self->{dispatcher} ||= {
 	IMP_DATA_HTTPRQ_HEADER+0  => [ 
 	    $self->can('request_hdr'),
@@ -47,6 +51,12 @@ sub data {
 	$sub->($self,$dir,$data,$offset);
     }
 }
+
+sub offset {
+    my ($self,$dir) = @_;
+    return $self->{pos}[$dir] // 0;
+}
+
 
 ###########################################################################
 # public interface

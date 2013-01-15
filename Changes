@@ -1,2 +1,9 @@
+0.2 2013/01/15
+- move Net::IMP::HTTP_AddXFooHeader to Net::IMP::HTTP::Example::AddXFooHeader
+- move App::HTTP_Proxy_IMP::LogFormData to Net::IMP::HTTP::LogFormData
+- add tests for both
+- make Net::IMP::HTTP::Connection support not only http and stream, but also
+  httprq interface
+- various fixes to Net::IMP::HTTP::Connection
 0.1 2013/01/11
-initial alpha release
+- initial alpha release

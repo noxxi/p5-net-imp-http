@@ -49,9 +49,9 @@ push @stream_data,[ 1,IMP_DATA_STREAM,'' ];
 
 my @typed_rv_expect = (
     [ 'pass', 1, -1 ],
-    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n\r\n" ],
     [ 'pass', 0, 29 ],
-    [ 'replace', 0, 82, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 82, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n\r\n" ],
     [ 'pass', 0, 91 ],
     [ 'pass', 0, 100 ],
     [ 'pass', 0, 102 ],
@@ -61,9 +61,9 @@ my @typed_rv_expect = (
 my @stream_rv_expect = (
     # same as @typed_rv_expect
     [ 'pass', 1, -1 ],
-    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 29, "GET / HTTP/1.1\r\nHost: foo\r\nX-Header: test\r\n\r\n" ],
     [ 'pass', 0, 29 ],
-    [ 'replace', 0, 82, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n" ],
+    [ 'replace', 0, 82, "POST /foo HTTP/1.1\r\nHost: bar\r\nContent-length: 20\r\nX-Header: test\r\n\r\n" ],
     # in between some different offsets, because we split header + content
     # from POST together, instead of only content in @typed_rv_expect
     [ 'pass', 0, 83 ],
@@ -134,7 +134,7 @@ sub data {
     $self->{pos0} = ( $offset||$self->{pos0} ) + length($data);
     if ( $type == IMP_DATA_HTTP_HEADER and $dir == 0 ) {
 	# add X-Header: test to request header
-	$data =~s{(\r?\n)\Z}{X-Header: test$1};
+	$data =~s{(\r?\n)\Z}{X-Header: test$1$1};
 	$self->run_callback([
 	    IMP_REPLACE,
 	    0,

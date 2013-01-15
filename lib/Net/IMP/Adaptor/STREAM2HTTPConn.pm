@@ -20,6 +20,8 @@ sub new_factory {
     my ($class,%args) = @_;
     my $factory = fields::new($class);
     $factory->{inner_factory} = $args{factory};
+    $factory->{inner_factory}->set_interface([ IMP_DATA_HTTP, undef ])
+	or croak("inner interface does not support http data");
     return  $factory;
 }
 
