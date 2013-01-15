@@ -137,6 +137,10 @@ Websocket, CONNECT request...). For end of data C<''> is send as C<$data>.
 
 =back
 
+If you use the default implementation of C<data> you can also use the method
+C<offset(dir)> to find out the current offset (e.g. position in byte stream
+after the given data). 
+
 Also an C<RTYPES> method should be implemented for the factory object and
 return a list of the supported return types. These will be used to construct
 the proper C<interface> method.

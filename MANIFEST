@@ -5,6 +5,7 @@ lib/Net/IMP/HTTP.pm
 lib/Net/IMP/HTTP/Base.pm
 lib/Net/IMP/HTTP/Connection.pm
 lib/Net/IMP/HTTP/Example/AddXFooHeader.pm
+lib/Net/IMP/HTTP/Example/FlipImg.pm
 lib/Net/IMP/HTTP/LogFormData.pm
 lib/Net/IMP/HTTP/Request.pm
 Makefile.PL
