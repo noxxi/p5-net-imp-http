@@ -13,9 +13,9 @@ use Data::Dumper;
 
 my $dump;
 for (
-    [ 'YAML' => 'YAML:Dump' ],
-    [ 'YAML::Tiny' => 'YAML::Tiny::Dump' ],
-    [ 'Data::Dumper' => 'Data::Dumper::Dumper' ],
+    [ 'YAML' => sub { YAML::Dump(@_) } ],
+    [ 'YAML::Tiny' => sub { YAML::Tiny::Dump(@_) } ],
+    [ 'Data::Dumper' => sub { Data::Dumper->new([@_])->Terse(1)->Dump }],
 ) {
     (my $pkg,$dump) = @$_;
     eval "require $pkg" or do {
@@ -25,8 +25,8 @@ for (
     last;
 }
 
-$dump or die; # at least Data::Dumper should be available
-$dump = eval "\\&$dump";
+# at least Data::Dumper should be available
+$dump or die "not even Data::Dumper is installed"; 
 
 use Test::More tests => 4;
 #$DEBUG = 1;
@@ -108,12 +108,12 @@ my @http_rv_expect = (
     [ 'pass', 1, -1 ],
     [ 'log', 0, 0, 0, 'info', $dump->({
 	'body.urlencoded' => [
-	    [ rab => 3 ],
-	    [ oof => 4 ]
+	    [ rab => '3' ],
+	    [ oof => '4' ]
 	],
 	'header.query_string' => [
-	    [ bar => 1 ],
-	    [ foo => 2 ]
+	    [ bar => '1' ],
+	    [ foo => '2' ]
 	],
     })],
     [ 'log', 0, 0, 0, 'info', $dump->({
@@ -139,12 +139,12 @@ my @httprq_rv_expect = (
     [ 'pass', 1, -1 ],
     [ 'log', 0, 0, 0, 'info', $dump->({
 	'body.urlencoded' => [
-	    [ rab => 3 ],
-	    [ oof => 4 ]
+	    [ rab => '3' ],
+	    [ oof => '4' ]
 	],
 	'header.query_string' => [
-	    [ bar => 1 ],
-	    [ foo => 2 ]
+	    [ bar => '1' ],
+	    [ foo => '2' ]
 	],
     })],
     [ 'prepass', 0, -1 ],
