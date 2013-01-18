@@ -11,6 +11,7 @@ use Net::IMP::Debug;
 use Net::Inspect::Debug var => \$DEBUG, sub => \&debug;
 use Data::Dumper;
 
+$Data::Dumper::Sortkeys = 1;
 my $dump;
 for (
     [ 'YAML' => sub { YAML::Dump(@_) } ],

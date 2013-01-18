@@ -12,6 +12,7 @@ use Net::Inspect::Debug var => \$DEBUG, sub => \&debug;
 use Data::Dumper;
 
 use Test::More tests => 4;
+$Data::Dumper::Sortkeys = 1;
 #$DEBUG = 1;
 
 

@@ -11,6 +11,7 @@ use Net::IMP::Debug;
 use Data::Dumper;
 
 use Test::More tests => 1;
+$Data::Dumper::Sortkeys = 1;
 # $DEBUG = 1;
 
 my @typed_data = (
