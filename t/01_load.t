@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 for my $pkg (
     'Net::IMP::HTTP',
@@ -8,6 +8,7 @@ for my $pkg (
     'Net::IMP::Adaptor::STREAM2HTTPConn',
     'Net::IMP::HTTP::Request',
     [ 'Net::IMP::HTTP::LogFormData', 'HTTP::Request' => 0 ],
+    'Net::IMP::HTTP::SaveResponse',
     'Net::IMP::HTTP::Example::AddXFooHeader',
     [ 'Net::IMP::HTTP::Example::FlipImg', 'Graphics::Magick' => 0 ],
     #'Net::IMP::Adaptor::STREAM2HTTPReq',
