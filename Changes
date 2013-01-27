@@ -1,3 +1,5 @@
+- make load of SaveResponse in t/01_load.t depend on File::Path version
+- skip t/05_logformdata.t if we cannot load LogFormData
 0.5 2013/01/22
 - new plugin SaveResponse
 - use Data::Dumper::Sortkeys in tests to make comparing results more reliable

@@ -29,11 +29,13 @@ for (
 # at least Data::Dumper should be available
 $dump or die "not even Data::Dumper is installed"; 
 
-use Test::More tests => 4;
+use Test::More;
 #$DEBUG = 1;
 
 
-ok( eval { require Net::IMP::HTTP::LogFormData },'load');
+eval { require Net::IMP::HTTP::LogFormData } 
+    or plan skip_all => "cannot load Net::IMP::HTTP::LogFormData: $@";
+plan tests => 3;
 
 my $multipart_body = 
     "--abcde\r\nContent-disposition: form-data; name=oFo\r\n\r\nlari\r\n".

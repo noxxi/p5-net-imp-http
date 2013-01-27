@@ -48,7 +48,7 @@ sub request_hdr {
     $fname .= "INDEX.html" if $2 eq '';
     if  ( ! -d $1 ) {
 	my $err;
-	make_path($1, -err => \$err);
+	make_path($1, { error => \$err  });
     }
     open($self->{fh},'>',"$fname.tmp") or do {
 	# making only selected dirs writable can be used as a way to save
