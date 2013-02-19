@@ -94,7 +94,10 @@ sub response_body {
     close($fh);
 
     debug("replace with ".length($self->{image})." bytes");
-    $self->run_callback([ IMP_REPLACE,1,$self->offset(1),$self->{image} ]);
+    $self->run_callback(
+	[ IMP_REPLACE,1,$self->offset(1),$self->{image} ],
+	[ IMP_PASS,1,IMP_MAXOFFSET ],
+    );
 }
 
 sub data {

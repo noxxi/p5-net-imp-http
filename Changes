@@ -1,3 +1,5 @@
+0.51 2013/02/19
+- adapted FlipImg to send pass with maxoffset after replacement at end of body
 - make load of SaveResponse in t/01_load.t depend on File::Path version
 - skip t/05_logformdata.t if we cannot load LogFormData
 0.5 2013/01/22

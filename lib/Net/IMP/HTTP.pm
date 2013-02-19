@@ -5,7 +5,7 @@ package Net::IMP::HTTP;
 use Net::IMP qw(:DEFAULT IMP_DATA );
 use Exporter 'import';
 
-our $VERSION = '0.5';
+our $VERSION = '0.51';
 our @EXPORT;
 
 # create and export NET_IMP_HTTP* constants
