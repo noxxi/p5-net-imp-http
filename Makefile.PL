@@ -5,8 +5,8 @@ WriteMakefile(
     VERSION_FROM => 'lib/Net/IMP/HTTP.pm',
     LICENSE => 'perl',
     PREREQ_PM => {
-	Net::IMP => 0.57,
-	Net::Inspect => 0.25,
+	Net::IMP => 0.60,
+	Net::Inspect => 0.27,
     },
     META_MERGE => {
 	resources => {
