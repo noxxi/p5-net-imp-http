@@ -3,17 +3,20 @@ use warnings;
 
 package Net::IMP::HTTP::Example::FlipImg;
 use base 'Net::IMP::HTTP::Request';
-use fields qw(ignore image);
+use fields (
+    'ignore',  # irrelevant content
+    'image',   # collected octets for image
+);
 
-use Net::IMP;
+use Net::IMP;  # import IMP_ constants
 use Net::IMP::Debug;
-use Graphics::Magick;
-use File::Temp 'tempfile';
+use Image::Magick;
+use constant MAX_SIZE => 2**16;
 
 sub new_analyzer {
     my ($factory,%args) = @_;
     my $self = $factory->SUPER::new_analyzer(%args);
-    # request data does not matter
+    # request data do not matter
     $self->run_callback([ IMP_PASS,0,IMP_MAXOFFSET ]);
     return $self;
 }
@@ -36,7 +39,7 @@ sub response_hdr {
     } elsif ( ! $ct or $ct !~m{^image/(png|gif|jpeg)$} ) {
 	debug("will not rotate content type $ct");
 	$ignore++;
-    } elsif ( $clen and $clen > 2**16 ) {
+    } elsif ( $clen and $clen > MAX_SIZE ) {
 	debug("image is too big: $clen" );
 	$ignore++;
     }
@@ -54,56 +57,42 @@ sub response_hdr {
 sub response_body {
     my ($self,$data) = @_;
     $self->{ignore} and return;
-    $self->{image} .= $data;
-
     my $off = $self->offset(1);
-    if ( $data ne '' ) {
-	# remove from buffer of data provider
-	# we have it all buffered here
-	# but keep 1 byte for the final replace
-	debug("replace up to $off-1 with ''");
-	$self->run_callback([ IMP_REPLACE,1,$off-1,'' ]) if $off>1;
 
-	# on chunked encoding we don't get a length up front, so check now
-	if ( length($self->{image}) > 2**16 ) {
-	    debug("image too big (chunked?)");
-	    $self->run_callback([ IMP_REPLACE,1,$off,$self->{image} ]);
-	    $self->run_callback([ IMP_PASS,1,IMP_MAXOFFSET ]);
+    if ( $data ne '' ) {
+	$self->{image} .= $data;  # append to image
+	# replace with '' in caller to save memory there
+	# at the end we will replace eof with the flipped image
+	$self->run_callback([ IMP_REPLACE,1,$off,'' ]);
+
+	# with chunked encoding we don't get a length up front, so check now
+	if ( length($self->{image}) > MAX_SIZE ) {
+	    debug("image too big");
+	    $self->run_callback(
+		[ IMP_REPLACE,1,$off,$self->{image} ], # unchanged image
+		[ IMP_PASS,1,IMP_MAXOFFSET ]
+	    );
 	    $self->{ignore} = 1;
 	}
 
 	return;
     }
 
-    # end of image reached
-    debug("flop image size=%d",length($self->{image}));
-    my ($fh,$file) = tempfile();
-    print $fh $self->{image};
-    close($fh);
-    my $img = Graphics::Magick->new;
-    debug("read image size=".( -s $file ));
-    $img->Read($file);
-    debug("flip image");
-    $img->Flip;
-    debug("write image");
-    $img->Write($file);
-    debug("rereading image size=".( -s $file));
-    open( $fh,'<',$file );
-    unlink($file);
-    $self->{image} = do { local $/; <$fh> };
-    close($fh);
+    # end of image reached, flip with Image::Magick
+    debug("flip image size=%d",length($self->{image}));
+    my $img = Image::Magick->new;
+    debug("failed to flip img: $@") if ! eval {
+	$img->BlobToImage($self->{image});
+	$img->Flip;
+	($self->{image}) = $img->ImageToBlob;
+	debug("replace with ".length($self->{image})." bytes");
+	1;
+    };
 
-    debug("replace with ".length($self->{image})." bytes");
     $self->run_callback(
 	[ IMP_REPLACE,1,$self->offset(1),$self->{image} ],
 	[ IMP_PASS,1,IMP_MAXOFFSET ],
     );
-}
-
-sub data {
-    my ($self,$dir,$data,$offset,$type) = @_;
-    debug("$self $dir,".length($data).",$offset,$type");
-    return $self->SUPER::data($dir,$data,$offset,$type);
 }
 
 1;
