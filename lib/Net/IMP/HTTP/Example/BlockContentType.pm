@@ -3,10 +3,6 @@ use warnings;
 
 package Net::IMP::HTTP::Example::BlockContentType;
 use base 'Net::IMP::HTTP::Request';
-use fields (
-    'ignore',  # irrelevant content
-);
-
 use Net::IMP;  # import IMP_ constants
 use Net::IMP::Debug;
 
@@ -53,16 +49,12 @@ sub any_data {}
 
 sub response_hdr {
     my ($self,$hdr) = @_;
-    my $ignore;
     # we only want selected image/ content types and not too big
-    debug("header=$hdr");
     my $ct = $hdr =~m{\nContent-type:[ \t]*([^\s;]+)}i && lc($1) 
 	|| 'unknown/unknown';
 
-    my $black = $self->{factory_args}{blackrx};
-    my $white = $self->{factory_args}{whiterx};
     my $reason;
-    if ( $white ) {
+    if ( my $white = $self->{factory_args}{whiterx} ) {
 	if ( $ct =~ $white ) {
 	    debug("allowed $ct because of white list");
 	    goto pass;
@@ -72,7 +64,7 @@ sub response_hdr {
 	    goto deny;
 	}
     }
-    if ( $black ) {
+    if ( my $black = $self->{factory_args}{blackrx} ) {
 	if ( $ct =~ $black ) {
 	    debug("denied $ct because in black list");
 	    $reason = "denied $ct because in black list";
@@ -84,12 +76,10 @@ sub response_hdr {
     }
 
     pass:
-    $self->{ignore} = 1;
     $self->run_callback([ IMP_PASS,1,IMP_MAXOFFSET ]);
     return;
 
     deny:
-    $self->{ignore} = 1;
     $self->run_callback([ IMP_DENY,1,$reason ]);
     return;
 }
