@@ -13,6 +13,7 @@ use Net::IMP::Debug;
 use Image::Magick;
 use constant MAX_SIZE => 2**16;
 
+sub RTYPES { ( IMP_PASS, IMP_REPLACE ) }
 sub new_analyzer {
     my ($factory,%args) = @_;
     my $self = $factory->SUPER::new_analyzer(%args);
