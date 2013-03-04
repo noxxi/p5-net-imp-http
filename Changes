@@ -1,3 +1,7 @@
+0.52 2013/03/03
+- new plugin Example::BlockContentType
+- reworked FlipIMG
+  use Image::Magick instead of Graphics::Magick (because of crash of Graphics::Magick)
 0.51 2013/02/19
 - adapted FlipImg to send pass with maxoffset after replacement at end of body
 - make load of SaveResponse in t/01_load.t depend on File::Path version
