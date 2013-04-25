@@ -19,6 +19,15 @@ sub new_factory {
     return $class->SUPER::new_factory(%args);
 }
 
+sub validate_cfg {
+    my ($class,%cfg) = @_;
+    my $dir = delete $cfg{root};
+    my @err = $class->SUPER::validate_cfg(%cfg);
+    push @err, "no or non-existing root dir given" 
+	if ! defined $dir or ! -d $dir;
+    return @err;
+}
+
 sub new_analyzer {
     my ($factory,%args) = @_;
     my $self = $factory->SUPER::new_analyzer(%args);
