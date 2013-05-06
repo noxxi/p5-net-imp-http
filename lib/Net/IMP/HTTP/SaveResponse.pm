@@ -45,7 +45,7 @@ sub DESTROY {
 sub request_hdr {
     my ($self,$hdr) = @_;
 
-    my ($method,$proto,$host,$path) = $hdr =~m{\A(\w+) +(?:(\w+)://([^/]+))?(\S+)};
+    my ($method,$proto,$host,$path) = $hdr =~m{\A([A-Z]+) +(?:(\w+)://([^/]+))?(\S+)};
     $host = $1 if $hdr =~m{\nHost: *(\S+)}i;
     $host or goto IGNORE;
     $proto ||= 'http';
@@ -63,7 +63,7 @@ sub request_hdr {
 	    or "$proto://$host$path" =~ $rx
     }
     if ( my $srh = $self->{factory_args}{method} ) {
-	goto IGNORE if ! _check_srh($srh,uc($method));
+	goto IGNORE if ! _check_srh($srh,$method);
     }
     
 
@@ -83,7 +83,7 @@ sub request_hdr {
 	tfh => $fh,
 	tname => $fname,
 	dir => $dir,
-	method => lc($method),
+	method => $method,
 	md5path => Digest::MD5->new->add($path)->hexdigest,
 	md5data => undef,
 	size => [ length($hdr),0,0,0 ],
@@ -140,11 +140,10 @@ sub response_hdr {
     if ( my $srh = $self->{factory_args}{content_type} ) {
 	my ($ct) = $hdr =~m{^Content-type:\s*([^\s;]+)}mi;
 	$ct ||= 'application/octet-stream';
-	warn "XXX check $ct against $srh\n";
 	return _stop_saving($self) if ! _check_srh( $srh, lc($ct));
     }
-    $f->{size}[2] += length($hdr);
     $hdr =~s{^(Content-encoding:|Transfer-encoding:|Content-length:)}{X-Original-$1}mig;
+    $f->{size}[2] = length($hdr);
     if ( defined $f->{rphdr} ) {
 	# defer, request body not fully read
 	$f->{rphdr} = $hdr;
@@ -173,13 +172,15 @@ sub _check_eof {
     my ($self,$bit) = @_;
     my $f = $self->{file} or return;
     ( $f->{eof} |= $bit ) == 3 or return;
+    $self->{file} = undef;
     print {$f->{tfh}} pack("NNNN",@{ $f->{size} });
     close($f->{tfh});
-    my $fname = "$f->{dir}/$f->{method}-$f->{md5path}";
-    $fname .= '-'.$f->{md5data}->hexdigest if $f->{md5data};
-    if ( rename($f->{tname}, $fname) ) {
-	$f->{tname} = undef;
-    }
+    my $fname = "$f->{dir}/".join( "-",
+	lc($f->{method}),
+	$f->{md5path},
+	$f->{md5data} ? ($f->{md5data}->hexdigest):()
+    );
+    rename($f->{tname}, $fname);
 }
 
 # will not be tracked
