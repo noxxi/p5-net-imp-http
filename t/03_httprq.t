@@ -87,7 +87,7 @@ for my $test (
     my $factory = XHdr->new_factory;
     $factory = $factory->set_interface([
 	$itype,
-	[ IMP_PASS,IMP_REPLACE,IMP_DENY ]
+	[ IMP_PASS,IMP_REPLACE,IMP_DENY,IMP_FATAL ]
     ]) or die "unsupported interface for $itype";
 
     my @rv;

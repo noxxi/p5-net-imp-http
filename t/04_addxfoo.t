@@ -89,7 +89,7 @@ for my $test (
     my $factory = Net::IMP::HTTP::Example::AddXFooHeader->new_factory;
     $factory = $factory->set_interface([
 	$itype,
-	[ IMP_PASS,IMP_PREPASS,IMP_REPLACE,IMP_DENY ]
+	[ IMP_PASS,IMP_PREPASS,IMP_REPLACE,IMP_DENY,IMP_FATAL ]
     ]) or die "unsupported interface for $itype";
 
     my @rv;

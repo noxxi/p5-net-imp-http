@@ -185,7 +185,7 @@ for my $test (
     my $factory = Net::IMP::HTTP::LogFormData->new_factory;
     $factory = $factory->set_interface([
 	$itype,
-	[ IMP_PASS,IMP_PREPASS,IMP_LOG,IMP_DENY ]
+	[ IMP_PASS,IMP_PREPASS,IMP_LOG,IMP_DENY,IMP_FATAL ]
     ]) or die "unsupported interface for $itype";
 
     my @rv;
