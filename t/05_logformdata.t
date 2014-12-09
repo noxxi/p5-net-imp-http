@@ -33,8 +33,8 @@ use Test::More;
 #$DEBUG = 1;
 
 
-eval { require Net::IMP::HTTP::LogFormData } 
-    or plan skip_all => "cannot load Net::IMP::HTTP::LogFormData: $@";
+eval { require Net::IMP::HTTP::Example::LogFormData } 
+    or plan skip_all => "cannot load Net::IMP::HTTP::Example::LogFormData: $@";
 plan tests => 3;
 
 my $multipart_body = 
@@ -182,7 +182,7 @@ for my $test (
 
     my ($itype,$data,$expect) = @$test;
 
-    my $factory = Net::IMP::HTTP::LogFormData->new_factory;
+    my $factory = Net::IMP::HTTP::Example::LogFormData->new_factory;
     $factory = $factory->set_interface([
 	$itype,
 	[ IMP_PASS,IMP_PREPASS,IMP_LOG,IMP_DENY,IMP_FATAL ]

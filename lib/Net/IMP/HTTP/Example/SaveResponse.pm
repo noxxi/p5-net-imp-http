@@ -1,7 +1,7 @@
 
 use strict;
 use warnings;
-package Net::IMP::HTTP::SaveResponse;
+package Net::IMP::HTTP::Example::SaveResponse;
 use base 'Net::IMP::HTTP::Request';
 use fields qw(root file);
 
@@ -12,6 +12,7 @@ use File::Temp 'tempfile';
 use Digest::MD5;
 use Carp;
 use Scalar::Util 'looks_like_number';
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my $DEFAULT_LIMIT = 10_000_000;
 
@@ -262,13 +263,13 @@ __END__
 
 =head1 NAME 
 
-Net::IMP::HTTP::SaveResponse - save response data to file system
+Net::IMP::HTTP::Example::SaveResponse - save response data to file system
 
 =head1 SYNOPSIS
 
   # use App::HTTP_Proxy_IMP to listen on 127.0.0.1:8000 and save all data 
   # in myroot/
-  $ perl bin/imp_http_proxy --filter SaveResponse=root=myroot 127.0.0.1:8000
+  $ perl bin/imp_http_proxy --filter Example::SaveResponse=root=myroot 127.0.0.1:8000
 
 
 =head1 DESCRIPTION

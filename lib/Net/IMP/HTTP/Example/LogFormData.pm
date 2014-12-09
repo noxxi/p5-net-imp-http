@@ -3,8 +3,10 @@
 
 use strict;
 use warnings;
-package Net::IMP::HTTP::LogFormData;
+package Net::IMP::HTTP::Example::LogFormData;
 use base 'Net::IMP::HTTP::Connection';
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
+
 use fields (
     'rqbuf',  # buffered data from request
     'req',    # HTTP::Request object for request header
@@ -182,7 +184,7 @@ __END__
 
 =head1 NAME
 
-Net::IMP::HTTP::LogFormData - IMP plugin to log formular uploads
+Net::IMP::HTTP::Example::LogFormData - IMP plugin to log formular uploads
 
 =head1 DESCRIPTION
 
