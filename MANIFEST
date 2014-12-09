@@ -2,7 +2,6 @@ Changes
 COPYRIGHT
 lib/Net/IMP/Adaptor/STREAM2HTTPConn.pm
 lib/Net/IMP/HTTP.pm
-lib/Net/IMP/HTTP/Base.pm
 lib/Net/IMP/HTTP/Connection.pm
 lib/Net/IMP/HTTP/Example/AddXFooHeader.pm
 lib/Net/IMP/HTTP/Example/FlipImg.pm
