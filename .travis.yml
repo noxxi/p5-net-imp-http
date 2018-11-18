@@ -2,6 +2,7 @@ branches:
   except:
     - gh-pages
 language: perl
+sudo: required
 perl:
   - "5.26"
   - "5.24"
@@ -12,3 +13,5 @@ perl:
   - "5.14"
   - "5.12"
   - "5.10"
+before_install:
+  - sudo apt-get install libpcap-dev
